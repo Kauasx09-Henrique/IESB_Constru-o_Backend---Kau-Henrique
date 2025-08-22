@@ -22,3 +22,22 @@ console.log("nota trabalho A1 :", trabalhoA1)
 console.log("Nota Prova A1: ", provaA1)
 
 console.log("Nota calculada: ", notaA1)
+
+
+let exerciciosA2 = parseFloat(prompt("Qual foi a nota do execicios A2"))
+let trabalhoA2 = parseFloat(prompt("Qual foi a notas exerciicos A2"))
+let provaA2 = parseFloat(prompt("Qual foi a nota da prova A2 "))
+
+let notaA2 = calcularnotaA2(exerciciosA2,  trabalhoA2, provaA2)
+
+console.log("### Calculo da NOTA #1")
+console.log("Nota Exercicio A1:", exerciciosA2)
+console.log("nota trabalho A1 :", trabalhoA2)
+console.log("Nota Prova A1: ", provaA2)
+
+console.log(" #######################################")
+
+console.log("Nota calculada: ", notaA2)
+
+let notafinal = (notaA1 + notaA2) / 2
+console.log("nota final", notafinal)
