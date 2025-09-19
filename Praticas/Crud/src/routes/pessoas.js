@@ -38,6 +38,60 @@ router.get('/pessoas/:id', (req, res, next) => {
     res.json(pessoa)
 })
 
+router.post("/pessoas", (req, res, next) => {
+    const { nome, cpf, email, dataNascimento } = req.body
+    if (!nome || !cpf || !email || !dataNascimento) {
+        return res.status(400).json({ error: "Nome, cpf, email e DataNascimento são obrigatórios!!!" })
+    }
+    // validar
+
+    if (listaPessoas.some(pessoa => pessoa.cpf == cpf)) {
+        return res.status(409).json({ error: "CPF já cadastrado!!!" })
+    }
+    const novaPessoas = {
+        id: Date.now(),
+        nome,
+        cpf,
+        email,
+        dataNascimento
+    }
+
+    listaPessoas.push(novaPessoas)
+    res.status(201).json({ message: "Pessoas cadastrada com sucessor", novaPessoas })
+})
+
+router.put("/pessoas/:id", (req, res, next) => {
+    const id = req.params.id
+    const pessoa = listaPessoas.find(pessoa => pessoa.id == id)
+
+    if (!pessoa) {
+        return res.status(404).json({ error: "Nenhuma pessoa encontrada" })
+    }
+    const { nome, email, dataNascimento } = req.body
+
+    if (!nome || !email || !dataNascimento) {
+        return res.status(400).json({ error: "nome, email, dataNascimento são obrigatorios!!" })
+    }
+
+    pessoa.nome = nome
+    pessoa.email = email
+    pessoa.dataNascimento = dataNascimento
+
+    res.json({ message: " Pessoa atualizada com sucesso!!!", pessoa })
+})
+router.delete("/pessoas/:id", (req, res, next ) => {
+    const id = req.params.id
+    const pessoa = listaPessoas.find(pessoa => pessoa.id == id)
+
+    if(!id){
+        return res.status(400).json({ error: "ID não encontrado!!!"})
+    }
+
+    res.status(201).json({ error: " id Excluido com sucesso"})
+
+})
+
+
 
 
 
