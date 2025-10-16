@@ -1,112 +1,114 @@
+// index.js
 const express = require("express");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 
-dotenv.config(); // se estiver usando .env
+dotenv.config();
 
 const app = express();
-app.use(express.json());
+app.use(express.json()); // Para ler JSON do corpo da requisição
 
+// Variáveis de ambiente
+const DB_USER = process.env.DB_USER;
+const DB_PASS = process.env.DB_PASS;
+const DB_HOST = process.env.DB_HOST;
+const DB_NAME = process.env.DB_NAME;
+const PORT = process.env.PORT || 3000;
 
+// Conexão com MongoDB Atlas
+const uri = `mongodb+srv://${DB_USER}:${DB_PASS}@${DB_HOST}/${DB_NAME}?retryWrites=true&w=majority`;
 
-require('dotenv').config();
-
-
-mongoose.connect('mongodb+srv://KauaHenrique:1234@cluster0.gtjsgld.mongodb.net/CrudLivros?retryWrites=true&w=majority')
-  .then(() => console.log("Conectado ao MongoDB!"))
+mongoose.connect(uri)
+  .then(() => console.log("Conectado ao MongoDB Atlas!"))
   .catch(err => console.log("Erro ao conectar no MongoDB:", err));
 
-const pessoaSchema = new mongoose.Schema({
-  nome: { type: String, required: true },
-  cpf: { type: String, required: true, unique: true },
-  email: { type: String, required: true },
-  dataNascimento: { type: String, required: true }
+// Schema e model do Livro
+const livroSchema = new mongoose.Schema({
+  titulo: { type: String, required: true },
+  autor: { type: String, required: true },
+  editora: { type: String, required: true },
+  ano: { type: Number, required: true },
+  preco: { type: Number, required: true }
 });
 
-const Pessoa = mongoose.model("Pessoa", pessoaSchema);
+const Livro = mongoose.model("Livro", livroSchema);
 
+// ================= CRUD ==================
 
-
-
-app.get("/pessoas", async (req, res) => {
-  const pessoas = await Pessoa.find();
-  res.json(pessoas);
-});
-
-// [GET] - Buscar uma pessoa por ID
-app.get("/pessoas/:id", async (req, res) => {
+// Listar todos os livros
+app.get("/livros", async (req, res) => {
   try {
-    const pessoa = await Pessoa.findById(req.params.id);
-    if (!pessoa) {
-      return res.status(404).json({ error: "Pessoa não encontrada!!!" });
-    }
-    res.json(pessoa);
-  } catch {
+    const livros = await Livro.find();
+    res.json(livros);
+  } catch (err) {
+    res.status(500).json({ error: "Erro ao buscar livros!" });
+  }
+});
+
+// Buscar livro por ID
+app.get("/livros/:id", async (req, res) => {
+  try {
+    const livro = await Livro.findById(req.params.id);
+    if (!livro) return res.status(404).json({ error: "Livro não encontrado!" });
+    res.json(livro);
+  } catch (err) {
     res.status(400).json({ error: "ID inválido!" });
   }
 });
 
-// [POST] - Cadastrar nova pessoa
-app.post("/pessoas", async (req, res) => {
-  const { nome, cpf, email, dataNascimento } = req.body;
+// Cadastrar novo livro
+app.post("/livros", async (req, res) => {
+  const { titulo, autor, editora, ano, preco } = req.body;
 
-  if (!nome || !cpf || !email || !dataNascimento) {
-    return res.status(400).json({ error: "Todos os campos são obrigatórios!!!" });
+  if (!titulo || !autor || !editora || !ano || !preco) {
+    return res.status(400).json({ error: "Todos os campos são obrigatórios!" });
   }
 
   try {
-    const novaPessoa = new Pessoa({ nome, cpf, email, dataNascimento });
-    await novaPessoa.save();
-    res.status(201).json({ message: "Pessoa cadastrada com sucesso!", novaPessoa });
+    const novoLivro = new Livro({ titulo, autor, editora, ano, preco });
+    await novoLivro.save();
+    res.status(201).json({ message: "Livro cadastrado com sucesso!", novoLivro });
   } catch (err) {
-    if (err.code === 11000) {
-      res.status(409).json({ error: "CPF já cadastrado!!!" });
-    } else {
-      res.status(500).json({ error: "Erro ao cadastrar pessoa!" });
-    }
+    console.log(err); // Mostra o erro real no terminal
+    res.status(500).json({ error: "Erro ao cadastrar livro!" });
   }
 });
 
-// [PUT] - Atualizar pessoa
-app.put("/pessoas/:id", async (req, res) => {
-  const { nome, email, dataNascimento } = req.body;
+// Atualizar livro
+app.put("/livros/:id", async (req, res) => {
+  const { titulo, autor, editora, ano, preco } = req.body;
 
-  if (!nome || !email || !dataNascimento) {
-    return res.status(400).json({ error: "nome, email e dataNascimento são obrigatórios!" });
+  if (!titulo || !autor || !editora || !ano || !preco) {
+    return res.status(400).json({ error: "Todos os campos são obrigatórios!" });
   }
 
   try {
-    const pessoaAtualizada = await Pessoa.findByIdAndUpdate(
+    const livroAtualizado = await Livro.findByIdAndUpdate(
       req.params.id,
-      { nome, email, dataNascimento },
+      { titulo, autor, editora, ano, preco },
       { new: true }
     );
-    if (!pessoaAtualizada) {
-      return res.status(404).json({ error: "Pessoa não encontrada!" });
-    }
-    res.json({ message: "Pessoa atualizada com sucesso!", pessoaAtualizada });
-  } catch {
-    res.status(400).json({ error: "Erro ao atualizar!" });
+    if (!livroAtualizado) return res.status(404).json({ error: "Livro não encontrado!" });
+    res.json({ message: "Livro atualizado com sucesso!", livroAtualizado });
+  } catch (err) {
+    console.log(err);
+    res.status(400).json({ error: "Erro ao atualizar livro!" });
   }
 });
 
-// [DELETE] - Excluir pessoa
-app.delete("/pessoas/:id", async (req, res) => {
+// Excluir livro
+app.delete("/livros/:id", async (req, res) => {
   try {
-    const pessoa = await Pessoa.findByIdAndDelete(req.params.id);
-    if (!pessoa) {
-      return res.status(404).json({ error: "Pessoa não encontrada!" });
-    }
-    res.json({ message: "Pessoa excluída com sucesso!" });
-  } catch {
-    res.status(400).json({ error: "Erro ao excluir!" });
+    const livro = await Livro.findByIdAndDelete(req.params.id);
+    if (!livro) return res.status(404).json({ error: "Livro não encontrado!" });
+    res.json({ message: "Livro excluído com sucesso!" });
+  } catch (err) {
+    console.log(err);
+    res.status(400).json({ error: "Erro ao excluir livro!" });
   }
 });
 
-const PORT = 3000;
-
+// ================= INICIAR SERVIDOR ==================
 app.listen(PORT, () => {
-  console.log(`Servidor rodando na porta http://localhost:${PORT}`);
+  console.log(`Servidor rodando em http://localhost:${PORT}`);
 });
-
-
