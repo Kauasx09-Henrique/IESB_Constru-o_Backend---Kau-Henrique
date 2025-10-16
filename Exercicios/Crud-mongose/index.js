@@ -96,7 +96,7 @@ app.put("/livros/:id", async (req, res) => {
   }
 });
 
-// Excluir livro
+
 app.delete("/livros/:id", async (req, res) => {
   try {
     const livro = await Livro.findByIdAndDelete(req.params.id);
