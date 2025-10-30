@@ -8,6 +8,5 @@ const schema = new mongoose.Schema(
         ano: { type: Number, required: true },
         preco: { type: Number, required: true }
     }, { timestamps: true })
-
 const LivroModel = mongoose.model('Livros', schema)
 module.exports = LivroModel
