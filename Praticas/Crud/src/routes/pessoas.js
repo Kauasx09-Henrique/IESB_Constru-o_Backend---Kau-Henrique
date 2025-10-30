@@ -20,7 +20,7 @@ let listaPessoas = [
         email: "p@gmail.com",
         dataNascimento: "01/07/2005"
     },
-]
+] 
 
 router.get('/pessoas', (req, res, next) => {
     res.json(listaPessoas)
@@ -79,15 +79,15 @@ router.put("/pessoas/:id", (req, res, next) => {
 
     res.json({ message: " Pessoa atualizada com sucesso!!!", pessoa })
 })
-router.delete("/pessoas/:id", (req, res, next ) => {
+router.delete("/pessoas/:id", (req, res, next) => {
     const id = req.params.id
     const pessoa = listaPessoas.find(pessoa => pessoa.id == id)
 
-    if(!id){
-        return res.status(400).json({ error: "ID não encontrado!!!"})
+    if (!pessoa) {
+        return res.status(404).json({ error: "ID associada a pessoa não encontrado!!!" })
     }
-
-    res.status(201).json({ error: " id Excluido com sucesso"})
+    listaPessoas = listaPessoas.filter(pessoa => pessoa.id != id)
+    res.status(200).json({ error: " id Excluido com sucesso" })
 
 })
 
