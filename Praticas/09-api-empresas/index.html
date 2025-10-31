@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🐍 Slither.io Supreme Ultra</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: radial-gradient(circle at center, #0a0a2a 0%, #000 100%);
+            overflow: hidden;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: white;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #game-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+
+        #game-canvas {
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+
+        #background-canvas {
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 0;
+        }
+
+        #hud {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 24px;
+            color: #fff;
+            text-shadow: 0 0 10px #0ff, 0 0 20px #0ff;
+            background: rgba(0, 20, 40, 0.7);
+            border-radius: 15px;
+            padding: 12px 30px;
+            box-shadow: 0 0 20px #0ff, inset 0 0 15px rgba(0, 255, 255, 0.3);
+            backdrop-filter: blur(5px);
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border: 1px solid rgba(0, 255, 255, 0.5);
+        }
+
+        #score {
+            font-weight: bold;
+            color: #0ff;
+            text-shadow: 0 0 15px #0ff;
+        }
+
+        #controls {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            color: #fff;
+            background: rgba(0, 20, 40, 0.7);
+            padding: 15px;
+            border-radius: 10px;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.2);
+            z-index: 10;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        #controls h3 {
+            color: #0ff;
+            margin-bottom: 8px;
+            text-shadow: 0 0 10px #0ff;
+        }
+
+        #leaderboard {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            color: #fff;
+            background: rgba(0, 20, 40, 0.7);
+            padding: 15px;
+            border-radius: 10px;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.2);
+            z-index: 10;
+            width: 200px;
+        }
+
+        #leaderboard h3 {
+            color: #0ff;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px #0ff;
+            text-align: center;
+        }
+
+        .leaderboard-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .leaderboard-name {
+            color: #fff;
+        }
+
+        .leaderboard-score {
+            color: #0ff;
+            font-weight: bold;
+        }
+
+        #power-ups {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            color: #fff;
+            background: rgba(0, 20, 40, 0.7);
+            padding: 15px;
+            border-radius: 10px;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.2);
+            z-index: 10;
+            width: 200px;
+        }
+
+        #power-ups h3 {
+            color: #0ff;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px #0ff;
+            text-align: center;
+        }
+
+        .power-up-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .power-up-icon {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+        }
+
+        #speed-boost {
+            background: linear-gradient(45deg, #ff00cc, #00ccff);
+        }
+
+        #score-multiplier {
+            background: linear-gradient(45deg, #ffcc00, #ff6600);
+        }
+
+        #magnet {
+            background: linear-gradient(45deg, #00ff00, #00cc66);
+        }
+
+        #game-over {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 10, 30, 0.9);
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            color: #fff;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(0, 255, 255, 0.5);
+            box-shadow: 0 0 40px rgba(0, 255, 255, 0.3);
+            z-index: 100;
+            display: none;
+        }
+
+        #game-over h2 {
+            color: #0ff;
+            font-size: 36px;
+            margin-bottom: 20px;
+            text-shadow: 0 0 15px #0ff;
+        }
+
+        #final-score {
+            font-size: 28px;
+            color: #fff;
+            margin-bottom: 30px;
+        }
+
+        #restart-btn {
+            background: linear-gradient(45deg, #00ccff, #ff00cc);
+            border: none;
+            color: white;
+            padding: 12px 30px;
+            border-radius: 30px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+        }
+
+        #restart-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.7);
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes glow {
+            0% { box-shadow: 0 0 10px #0ff; }
+            50% { box-shadow: 0 0 20px #0ff, 0 0 30px #0ff; }
+            100% { box-shadow: 0 0 10px #0ff; }
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <canvas id="background-canvas"></canvas>
+        <canvas id="game-canvas"></canvas>
+        
+        <div id="hud">
+            <span>🐍</span> Pontuação: <b id="score">0</b>
+        </div>
+        
+        <div id="controls">
+            <h3>Controles</h3>
+            <p>🖱️ Mova o mouse para controlar</p>
+            <p>⇧ Segure Shift para turbo</p>
+            <p>⏎ Pressione Enter para pausar</p>
+        </div>
+        
+        <div id="leaderboard">
+            <h3>Ranking</h3>
+            <div id="leaderboard-list">
+                <!-- Preenchido dinamicamente -->
+            </div>
+        </div>
+        
+        <div id="power-ups">
+            <h3>Power-ups</h3>
+            <div class="power-up-item">
+                <div class="power-up-icon" id="speed-boost"></div>
+                <span>Turbo Ativo</span>
+            </div>
+            <div class="power-up-item">
+                <div class="power-up-icon" id="score-multiplier"></div>
+                <span>Multiplicador x2</span>
+            </div>
+            <div class="power-up-item">
+                <div class="power-up-icon" id="magnet"></div>
+                <span>Ímã de Comida</span>
+            </div>
+        </div>
+        
+        <div id="game-over">
+            <h2>Fim de Jogo!</h2>
+            <div id="final-score">Pontuação: 0</div>
+            <button id="restart-btn">Jogar Novamente</button>
+        </div>
+    </div>
+
+    <script>
+        // Configuração dos canvases
+        const bgCanvas = document.getElementById('background-canvas');
+        const bgCtx = bgCanvas.getContext('2d');
+        const gameCanvas = document.getElementById('game-canvas');
+        const ctx = gameCanvas.getContext('2d');
+
+        // Ajuste de tamanho
+        let width = bgCanvas.width = gameCanvas.width = window.innerWidth;
+        let height = bgCanvas.height = gameCanvas.height = window.innerHeight;
+
+        // Elementos da UI
+        const scoreEl = document.getElementById('score');
+        const leaderboardList = document.getElementById('leaderboard-list');
+        const gameOverScreen = document.getElementById('game-over');
+        const finalScoreEl = document.getElementById('final-score');
+        const restartBtn = document.getElementById('restart-btn');
+
+        // Estado do jogo
+        let score = 0;
+        let gameRunning = true;
+        let gamePaused = false;
+        let keys = {};
+        let mouse = { x: width/2, y: height/2 };
+
+        // Configuração de controles
+        document.addEventListener('keydown', e => {
+            keys[e.key] = true;
+            if (e.key === 'Enter') togglePause();
+        });
+        document.addEventListener('keyup', e => keys[e.key] = false);
+        document.addEventListener('mousemove', e => { 
+            mouse.x = e.clientX; 
+            mouse.y = e.clientY; 
+        });
+
+        // Funções utilitárias
+        const rand = (min, max) => Math.random() * (max - min) + min;
+        const dist = (x1, y1, x2, y2) => Math.hypot(x2 - x1, y2 - y1);
+        const colors = ['#00FFF7', '#FF00E6', '#00FF88', '#FFD700', '#FF4500', '#4D9EFF', '#ADFF2F'];
+
+        // Sistema de partículas aprimorado
+        const ParticleSystem = {
+            particles: [],
+            
+            spawn(x, y, color, count = 5, size = 3) {
+                for(let i = 0; i < count; i++) {
+                    this.particles.push({
+                        x, y,
+                        dx: rand(-3, 3),
+                        dy: rand(-3, 3),
+                        alpha: 1,
+                        color,
+                        radius: rand(size * 0.5, size * 1.5),
+                        life: rand(0.5, 1.5)
+                    });
+                }
+            },
+            
+            update() {
+                for(let i = this.particles.length - 1; i >= 0; i--) {
+                    const p = this.particles[i];
+                    p.x += p.dx;
+                    p.y += p.dy;
+                    p.alpha -= 0.02;
+                    p.life -= 0.02;
+                    
+                    if(p.alpha <= 0 || p.life <= 0) {
+                        this.particles.splice(i, 1);
+                    }
+                }
+            },
+            
+            draw() {
+                for(const p of this.particles) {
+                    ctx.globalAlpha = p.alpha;
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                    ctx.fillStyle = p.color;
+                    ctx.shadowColor = p.color;
+                    ctx.shadowBlur = 15;
+                    ctx.fill();
+                }
+                ctx.globalAlpha = 1;
+                ctx.shadowBlur = 0;
+            }
+        };
+
+        // Sistema de estrelas de fundo
+        const Starfield = {
+            stars: [],
+            
+            init(count = 200) {
+                for(let i = 0; i < count; i++) {
+                    this.stars.push({
+                        x: rand(0, width),
+                        y: rand(0, height),
+                        size: rand(0.5, 2),
+                        brightness: rand(0.3, 1),
+                        speed: rand(0.1, 0.5)
+                    });
+                }
+            },
+            
+            update() {
+                for(const star of this.stars) {
+                    star.x -= star.speed;
+                    if(star.x < 0) {
+                        star.x = width;
+                        star.y = rand(0, height);
+                    }
+                }
+            },
+            
+            draw() {
+                for(const star of this.stars) {
+                    bgCtx.globalAlpha = star.brightness;
+                    bgCtx.beginPath();
+                    bgCtx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+                    bgCtx.fillStyle = '#FFFFFF';
+                    bgCtx.fill();
+                }
+                bgCtx.globalAlpha = 1;
+            }
+        };
+
+        // Classe da cobra aprimorada
+        class Snake {
+            constructor() {
+                this.x = width / 2;
+                this.y = height / 2;
+                this.angle = 0;
+                this.speed = 2.3;
+                this.radius = 12;
+                this.length = 70;
+                this.points = [];
+                this.color = '#00FFF7';
+                this.trailParticles = [];
+                this.turboActive = false;
+                this.scoreMultiplier = 1;
+                this.magnetRange = 0;
+            }
+
+            update() {
+                if (gamePaused) return;
+                
+                const dx = mouse.x - this.x;
+                const dy = mouse.y - this.y;
+                const targetAngle = Math.atan2(dy, dx);
+                this.angle += (targetAngle - this.angle) * 0.15;
+
+                this.turboActive = keys['Shift'];
+                const velocity = this.turboActive ? this.speed * 1.9 : this.speed;
+
+                this.x += Math.cos(this.angle) * velocity;
+                this.y += Math.sin(this.angle) * velocity;
+
+                // Limites da tela
+                this.x = Math.max(this.radius, Math.min(width - this.radius, this.x));
+                this.y = Math.max(this.radius, Math.min(height - this.radius, this.y));
+
+                this.points.unshift({x: this.x, y: this.y});
+                if(this.points.length > this.length) this.points.pop();
+
+                // Efeitos de turbo
+                if(this.turboActive) {
+                    ParticleSystem.spawn(this.x, this.y, '#00FFF7', 3, 2);
+                    score = Math.max(0, score - 0.2);
+                }
+                
+                // Partículas de rastro
+                if (Math.random() < 0.3) {
+                    ParticleSystem.spawn(
+                        this.x - Math.cos(this.angle) * this.radius, 
+                        this.y - Math.sin(this.angle) * this.radius, 
+                        this.color, 
+                        1, 
+                        1.5
+                    );
+                }
+            }
+
+            draw() {
+                // Desenhar corpo da cobra
+                ctx.lineCap = "round";
+                ctx.lineJoin = "round";
+                
+                for(let i = 0; i < this.points.length - 1; i++) {
+                    const p = this.points[i];
+                    const n = this.points[i + 1];
+                    const hue = (i * 4 + performance.now() / 10) % 360;
+                    ctx.strokeStyle = `hsl(${hue}, 100%, 60%)`;
+                    ctx.lineWidth = this.radius * (1 - i / this.points.length) * 2;
+                    ctx.shadowColor = ctx.strokeStyle;
+                    ctx.shadowBlur = 20;
+                    ctx.beginPath();
+                    ctx.moveTo(p.x, p.y);
+                    ctx.lineTo(n.x, n.y);
+                    ctx.stroke();
+                }
+                ctx.shadowBlur = 0;
+
+                // Desenhar cabeça com efeito de brilho
+                const gradient = ctx.createRadialGradient(
+                    this.x, this.y, 0,
+                    this.x, this.y, this.radius * 2
+                );
+                gradient.addColorStop(0, '#FFFFFF');
+                gradient.addColorStop(0.5, this.color);
+                gradient.addColorStop(1, 'transparent');
+                
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = gradient;
+                ctx.shadowColor = this.color;
+                ctx.shadowBlur = 30;
+                ctx.fill();
+                ctx.shadowBlur = 0;
+                
+                // Efeito de turbo
+                if (this.turboActive) {
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.radius * 1.5, 0, Math.PI * 2);
+                    ctx.strokeStyle = '#00FFF7';
+                    ctx.lineWidth = 2;
+                    ctx.shadowColor = '#00FFF7';
+                    ctx.shadowBlur = 20;
+                    ctx.stroke();
+                    ctx.shadowBlur = 0;
+                }
+            }
+        }
+
+        // Classe de comida aprimorada
+        class Food {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.radius = rand(4, 7);
+                this.color = colors[Math.floor(rand(0, colors.length))];
+                this.pulse = 0;
+                this.pulseDirection = 1;
+            }
+            
+            update() {
+                this.pulse += 0.05 * this.pulseDirection;
+                if (this.pulse > 1 || this.pulse < 0) {
+                    this.pulseDirection *= -1;
+                }
+            }
+
+            draw() {
+                const pulseSize = this.radius * (1 + this.pulse * 0.3);
+                
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, pulseSize, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.shadowColor = this.color;
+                ctx.shadowBlur = 20;
+                ctx.fill();
+                ctx.shadowBlur = 0;
+                
+                // Efeito de brilho interno
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, pulseSize * 0.5, 0, Math.PI * 2);
+                ctx.fillStyle = '#FFFFFF';
+                ctx.globalAlpha = 0.7;
+                ctx.fill();
+                ctx.globalAlpha = 1;
+            }
+        }
+
+        // Classe de power-ups
+        class PowerUp {
+            constructor(x, y, type) {
+                this.x = x;
+                this.y = y;
+                this.radius = 15;
+                this.type = type; // 'speed', 'multiplier', 'magnet'
+                this.color = this.getColorByType();
+                this.rotation = 0;
+                this.lifeTime = 300; // frames
+            }
+            
+            getColorByType() {
+                switch(this.type) {
+                    case 'speed': return '#FF00CC';
+                    case 'multiplier': return '#FFCC00';
+                    case 'magnet': return '#00FF00';
+                    default: return '#FFFFFF';
+                }
+            }
+            
+            update() {
+                this.rotation += 0.05;
+                this.lifeTime--;
+                return this.lifeTime > 0;
+            }
+            
+            draw() {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.rotation);
+                
+                // Forma do power-up
+                ctx.beginPath();
+                ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.shadowColor = this.color;
+                ctx.shadowBlur = 20;
+                ctx.fill();
+                
+                // Símbolo interno
+                ctx.beginPath();
+                ctx.fillStyle = '#FFFFFF';
+                switch(this.type) {
+                    case 'speed':
+                        ctx.moveTo(-this.radius/2, -this.radius/2);
+                        ctx.lineTo(this.radius/2, 0);
+                        ctx.lineTo(-this.radius/2, this.radius/2);
+                        ctx.closePath();
+                        break;
+                    case 'multiplier':
+                        ctx.font = `${this.radius}px Arial`;
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        ctx.fillText('×2', 0, 0);
+                        break;
+                    case 'magnet':
+                        ctx.arc(0, 0, this.radius/2, 0, Math.PI * 2);
+                        break;
+                }
+                ctx.fill();
+                
+                ctx.restore();
+                ctx.shadowBlur = 0;
+            }
+        }
+
+        // Inicialização do jogo
+        const snake = new Snake();
+        let foods = [];
+        let powerUps = [];
+        let leaderboard = [
+            { name: "Player", score: 0 },
+            { name: "AI-1", score: 450 },
+            { name: "AI-2", score: 320 },
+            { name: "AI-3", score: 280 },
+            { name: "AI-4", score: 150 }
+        ];
+
+        function spawnFoods(n = 60) {
+            for(let i = 0; i < n; i++) {
+                foods.push(new Food(rand(0, width), rand(0, height)));
+            }
+        }
+
+        function spawnPowerUp() {
+            if (Math.random() < 0.01 && powerUps.length < 3) { // 1% de chance a cada frame
+                const types = ['speed', 'multiplier', 'magnet'];
+                const type = types[Math.floor(Math.random() * types.length)];
+                powerUps.push(new PowerUp(rand(100, width-100), rand(100, height-100), type));
+            }
+        }
+
+        function updateLeaderboard() {
+            // Atualiza a pontuação do jogador
+            leaderboard[0].score = Math.floor(score);
+            
+            // Ordena o ranking
+            leaderboard.sort((a, b) => b.score - a.score);
+            
+            // Atualiza a UI
+            leaderboardList.innerHTML = '';
+            for(let i = 0; i < Math.min(5, leaderboard.length); i++) {
+                const item = document.createElement('div');
+                item.className = 'leaderboard-item';
+                item.innerHTML = `
+                    <span class="leaderboard-name">${leaderboard[i].name}</span>
+                    <span class="leaderboard-score">${leaderboard[i].score}</span>
+                `;
+                leaderboardList.appendChild(item);
+            }
+        }
+
+        function togglePause() {
+            gamePaused = !gamePaused;
+            if (gamePaused) {
+                // Efeito de pausa
+                ParticleSystem.spawn(width/2, height/2, '#FFFFFF', 50, 5);
+            }
+        }
+
+        function gameOver() {
+            gameRunning = false;
+            finalScoreEl.textContent = `Pontuação: ${Math.floor(score)}`;
+            gameOverScreen.style.display = 'block';
+            
+            // Efeito de explosão
+            for(let i = 0; i < 100; i++) {
+                ParticleSystem.spawn(snake.x, snake.y, snake.color, 1, 4);
+            }
+        }
+
+        function restartGame() {
+            score = 0;
+            gameRunning = true;
+            gamePaused = false;
+            snake.x = width / 2;
+            snake.y = height / 2;
+            snake.points = [];
+            snake.radius = 12;
+            snake.length = 70;
+            snake.scoreMultiplier = 1;
+            snake.magnetRange = 0;
+            foods = [];
+            powerUps = [];
+            spawnFoods();
+            gameOverScreen.style.display = 'none';
+        }
+
+        // Event listeners
+        restartBtn.addEventListener('click', restartGame);
+
+        // Loop principal do jogo
+        function loop() {
+            // Limpar canvases
+            bgCtx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+            bgCtx.fillRect(0, 0, width, height);
+            
+            ctx.clearRect(0, 0, width, height);
+            
+            // Atualizar e desenhar estrelas
+            Starfield.update();
+            Starfield.draw();
+            
+            // Atualizar elementos do jogo
+            if (!gamePaused && gameRunning) {
+                snake.update();
+                ParticleSystem.update();
+                
+                for (const food of foods) {
+                    food.update();
+                }
+                
+                // Atualizar power-ups
+                for (let i = powerUps.length - 1; i >= 0; i--) {
+                    if (!powerUps[i].update()) {
+                        powerUps.splice(i, 1);
+                    }
+                }
+                
+                // Spawn de power-ups
+                spawnPowerUp();
+                
+                // Verificar colisão com comida
+                for (let i = foods.length - 1; i >= 0; i--) {
+                    const f = foods[i];
+                    const distance = dist(snake.x, snake.y, f.x, f.y);
+                    
+                    // Efeito de magnetismo
+                    if (snake.magnetRange > 0 && distance < snake.magnetRange + f.radius) {
+                        const dx = snake.x - f.x;
+                        const dy = snake.y - f.y;
+                        const angle = Math.atan2(dy, dx);
+                        f.x += Math.cos(angle) * 3;
+                        f.y += Math.sin(angle) * 3;
+                    }
+                    
+                    if (distance < snake.radius + f.radius) {
+                        foods.splice(i, 1);
+                        ParticleSystem.spawn(f.x, f.y, f.color, 10, 2);
+                        score += 10 * snake.scoreMultiplier;
+                        snake.length += 2;
+                        // Efeito visual de crescimento
+                        snake.radius += 0.1;
+                    }
+                }
+                
+                // Verificar colisão com power-ups
+                for (let i = powerUps.length - 1; i >= 0; i--) {
+                    const p = powerUps[i];
+                    if (dist(snake.x, snake.y, p.x, p.y) < snake.radius + p.radius) {
+                        // Aplicar efeito do power-up
+                        switch(p.type) {
+                            case 'speed':
+                                snake.speed += 0.5;
+                                setTimeout(() => { snake.speed -= 0.5; }, 10000); // 10 segundos
+                                break;
+                            case 'multiplier':
+                                snake.scoreMultiplier = 2;
+                                setTimeout(() => { snake.scoreMultiplier = 1; }, 15000); // 15 segundos
+                                break;
+                            case 'magnet':
+                                snake.magnetRange = 150;
+                                setTimeout(() => { snake.magnetRange = 0; }, 12000); // 12 segundos
+                                break;
+                        }
+                        
+                        // Efeito visual
+                        ParticleSystem.spawn(p.x, p.y, p.color, 30, 4);
+                        powerUps.splice(i, 1);
+                    }
+                }
+                
+                // Respaw de comida se necessário
+                if (foods.length < 50) spawnFoods(10);
+                
+                // Atualizar leaderboard
+                updateLeaderboard();
+            }
+            
+            // Desenhar elementos do jogo
+            for (const f of foods) f.draw();
+            for (const p of powerUps) p.draw();
+            snake.draw();
+            ParticleSystem.draw();
+            
+            // Atualizar pontuação na UI
+            scoreEl.textContent = Math.floor(score);
+            
+            // Continuar o loop
+            requestAnimationFrame(loop);
+        }
+
+        // Inicialização
+        function init() {
+            Starfield.init();
+            spawnFoods();
+            updateLeaderboard();
+            loop();
+        }
+
+        // Redimensionamento
+        window.addEventListener('resize', () => {
+            width = bgCanvas.width = gameCanvas.width = window.innerWidth;
+            height = bgCanvas.height = gameCanvas.height = window.innerHeight;
+            Starfield.init();
+        });
+
+        // Iniciar o jogo
+        init();
+    </script>
+</body>
+</html>
