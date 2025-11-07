@@ -1,0 +1,15 @@
+const mongoose = require('mongoose');
+
+const schema = new mongoose.Schema(
+    {
+        titulo: { type: String, required: true },
+        descricao: { type: String, required: true },
+        dataInicio: { type: Date, required: true },
+        dataTermino: { type: Date, required: false },
+        funcionario : { type: mongoose.Schema.Types.ObjectId, ref: 'Funcionarios', required: true },
+        projeto : { type: mongoose.Schema.Types.ObjectId, ref: 'Projetos', required: false },
+    }, { timestamps: true });
+    const TarefaModel = mongoose.model('Tarefas', schema);
+    module.exports = TarefaModel;
+
+    
